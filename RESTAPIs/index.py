@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+import json
 
 app = Flask(__name__)
 
@@ -25,7 +26,7 @@ def get_country_id(id):
     return jsonify(data)
 
 #POST RESTAPIs
-@app.route('/post-country', methods=["POST"])
+@app.route('/country', methods=["POST"])
 def add_country():
     id = request.form.get('id')
     name = request.form.get('name')
@@ -45,7 +46,37 @@ def add_country():
         countries.append(data)
         return jsonify(countries)
 
-# Code Here for DELELE APIs
+# Code Here for PUT APIs
+@app.route('/country', methods=["PUT"])
+def update_country():
+    global countries
+
+    id = str(request.args.get('id'))
+    name = request.args.get('name')
+    capital = request.args.get('capital')
+    area = str(request.args.get('area'))
+
+    update_data = {
+        "id": id, 
+        "name": name, 
+        "capital": capital, 
+        "area": area
+        }
+
+    if (_find_next_id(id)):
+        data = [x for x in countries if x["id"]!=id]
+        data.append(update_data)
+        countries = data
+        return jsonify(countries)
+    else:
+        return {"error": "Bad Request ID = " + id}, 400
+
+#Delete REST APIs
+@app.route('/country', methods=["DELETE"])
+def del_country():
+    id = request.args.get('id')
+    data = [x for x in countries if x["id"]!=id]
+    return jsonify(data), 201
 
 @app.errorhandler(404)
 def page_not_found(e):
